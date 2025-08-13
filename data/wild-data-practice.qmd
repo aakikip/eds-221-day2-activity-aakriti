@@ -2,25 +2,101 @@
 title: "wild-data"
 format: html
 editor: visual
+warning: FALSE
+message: FALSE
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Wild data
 
 ```{r}
-1 + 1
+#Each column on the data set of consists of the information of Salamander and Cutthroat trout over the years that has been monitored since 1987 and 1993 respectively.
 ```
-
-You can add options to executable code like this
 
 ```{r}
-#| echo: false
-2 * 2
+library(tidyverse)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+library(here)
+```
+
+```{r}
+library(janitor)
+```
+
+```{r}
+mack_verts <- read_csv(here::here("data", "AS00601.csv"))
+
+```
+
+```{r}
+#View(mack_verts)
+```
+
+```{r}
+mack_verts <- mack_verts |> clean_names()
+
+```
+
+```{r}
+mc_wt_5 <- mack_verts$weight[5]
+```
+
+```{r}
+mc_length_8_20 <- mack_verts$length1[8:20]
+```
+
+```{r}
+mc_dates <- mack_verts$sampledate
+
+```
+
+```{r}
+mc_salamanders <- mack_verts %>% dplyr::filter(species == "DITE")
+
+#mc_salamanders <- dplyr::filter(mack_verts, species == "DITE")
+```
+
+```{r}
+#making scatterplot
+
+mc_salamanders_plot <- ggplot(data = mc_salamanders, aes(x = length1, y = weight, color = length1)) +
+  geom_point() +
+    labs(title = "Scatterplot of Salamander Length * Weight",
+       x = "Snout-vent length (mm)",
+       y = "Weight (g)")
+```
+
+```{r}
+mc_salamanders_plot
+```
+
+```{r}
+ggsave(here::here("figs", "mc_salamanders_plot.png"))
+```
+
+```{r}
+mc_trout <- dplyr::filter(mack_verts, species == "ONCL")
+mc_trout
+```
+
+```{r}
+cols <- c("red", "purple", "pink")
+
+mc_trout_plot <- ggplot(data = mc_trout, aes(x = length1, y = weight)) +
+  geom_point(aes(color = factor(reach))) +
+  labs(title = "Cutthroat plot",
+       x = "Length",
+       y = "Weight") +
+  scale_colour_manual(values = cols) +
+  facet_wrap(~reach)
+
+```
+
+```{r}
+mc_trout_plot
+```
+
+```{r}
+ggsave(here::here("figs", "mc_trout_plot.png"))
+```
